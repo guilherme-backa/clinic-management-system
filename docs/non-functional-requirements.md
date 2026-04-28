@@ -1,7 +1,7 @@
 # Requisitos Não Funcionais
 
-**Versão**: 1.0  
-**Data**: 2026-04-28  
+**Versão**: 1.1
+**Data**: 2026-04-28
 **Status**: Draft
 
 ---
@@ -59,6 +59,9 @@ Ações críticas devem exigir validação de permissão.
 
 ### RNF-SEG-007
 O sistema deve registrar tentativas de acesso inválidas e eventos relevantes de segurança.
+
+### RNF-SEG-008
+O app mobile deve armazenar tokens JWT usando flutter_secure_storage (Keychain no iOS, Keystore no Android). Nenhum token deve ser salvo em SharedPreferences ou texto claro.
 
 ---
 
@@ -147,15 +150,26 @@ Mensagens de erro devem ser compreensíveis.
 ### RNF-USA-004
 A navegação deve respeitar contexto de workspace e clínica.
 
+### RNF-USA-005
+O app mobile deve seguir as diretrizes de UI do Material Design 3 (Flutter padrão) para garantir experiência consistente em Android e iOS.
+
 ---
 
 ## 9. Compatibilidade
 
 ### RNF-COMP-001
-A aplicação web deve funcionar nos principais navegadores modernos.
+A aplicação web deve funcionar nos principais navegadores modernos (Chrome, Firefox, Safari, Edge).
 
 ### RNF-COMP-002
-A aplicação deve ser responsiva para uso em diferentes resoluções, mesmo que o foco inicial seja desktop.
+A aplicação web deve ser responsiva para uso em diferentes resoluções, mesmo que o foco inicial seja desktop.
+
+### RNF-COMP-003
+O app mobile Flutter deve ser compatível com:
+- Android 8.0 (API 26) ou superior;
+- iOS 13.0 ou superior.
+
+### RNF-COMP-004
+A API REST deve seguir contrato estável (versionamento via path: `/api/v1/`) para suportar clientes web e mobile sem breaking changes não anunciados.
 
 ---
 
@@ -180,6 +194,9 @@ O projeto deve possuir documentação mínima para setup e manutenção.
 ### RNF-MAN-003
 Mudanças em um módulo devem minimizar impacto em outros módulos.
 
+### RNF-MAN-004
+O código Flutter deve seguir Clean Architecture com separação clara entre data, domain e presentation.
+
 ---
 
 ## 12. Testabilidade
@@ -192,6 +209,12 @@ Fluxos críticos devem ter testes de integração.
 
 ### RNF-TST-003
 Regras de permissão e isolamento por workspace devem ser testadas.
+
+### RNF-TST-004
+O app mobile deve possuir:
+- testes unitários de BLoCs, use cases e repositórios;
+- testes de widget para componentes críticos;
+- testes de integração para os fluxos principais.
 
 ---
 
@@ -222,6 +245,9 @@ O projeto deve permitir configuração por variáveis de ambiente.
 ### RNF-OPS-003
 A documentação deve explicar setup mínimo do sistema.
 
+### RNF-OPS-004
+O setup do app Flutter deve ser verificável com `flutter doctor` sem erros críticos.
+
 ---
 
 ## Indicadores de Qualidade Sugeridos
@@ -229,12 +255,13 @@ A documentação deve explicar setup mínimo do sistema.
 - tempo médio de resposta por endpoint;
 - taxa de erro por operação;
 - uptime;
-- cobertura de testes;
+- cobertura de testes (backend mínimo 80%, mobile mínimo 70%);
 - volume de eventos de auditoria;
 - falhas de autenticação;
-- quantidade de incidentes por release.
+- quantidade de incidentes por release;
+- crash rate do app mobile.
 
 ---
 
-**Versão**: 1.0  
+**Versão**: 1.1
 **Última atualização**: 2026-04-28
