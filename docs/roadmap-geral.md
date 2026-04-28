@@ -1,7 +1,7 @@
 # Roadmap Geral do Produto
 
-**Versão**: 1.0  
-**Data**: 2026-04-28  
+**Versão**: 1.1
+**Data**: 2026-04-28
 **Status**: Draft
 
 ---
@@ -15,7 +15,7 @@ Organizar a evolução do Clinic Management System em fases, priorizando a const
 ## Visão por Fases
 
 ### Fase 1 — MVP Operacional
-Objetivo: colocar o sistema em uso com os recursos essenciais.
+Objetivo: colocar o sistema em uso com os recursos essenciais via web.
 
 #### Entregas
 - criação de workspace;
@@ -34,15 +34,27 @@ Objetivo: colocar o sistema em uso com os recursos essenciais.
 - prescrição;
 - dashboard básico.
 
+#### Stack desta fase
+- Backend: NestJS + PostgreSQL + Redis
+- Frontend: Next.js + TailwindCSS
+
 #### Resultado esperado
-Uma clínica já consegue operar o sistema de forma básica e segura.
+Uma clínica já consegue operar o sistema de forma básica e segura pelo navegador.
 
 ---
 
-### Fase 2 — Consolidação Operacional
-Objetivo: aumentar confiabilidade, controle e produtividade operacional.
+### Fase 2 — Consolidação Operacional + App Mobile
+Objetivo: aumentar confiabilidade, controle e produtividade, e lançar o app mobile nativo.
 
 #### Entregas
+- **app mobile Flutter** (Android e iOS) com funcionalidades core:
+  - autenticação e sessão;
+  - dashboard operacional;
+  - agenda e agendamentos;
+  - consulta de prontuários e histórico;
+  - cadastro de tutor e animal;
+  - registro de atendimento clínico;
+  - vacinação e prescrição;
 - 2FA completo;
 - filtros avançados;
 - gestão de convites aprimorada;
@@ -54,8 +66,11 @@ Objetivo: aumentar confiabilidade, controle e produtividade operacional.
 - melhorias de UX;
 - observabilidade e logs mais completos.
 
+#### Stack adicional desta fase
+- Mobile: Flutter 3.19+ / Dart 3.3+ (Clean Architecture + BLoC + GoRouter)
+
 #### Resultado esperado
-O sistema se torna mais consistente para operação contínua e mais preparado para equipes maiores.
+O sistema se torna mais consistente para operação contínua, disponível também via app mobile.
 
 ---
 
@@ -63,9 +78,9 @@ O sistema se torna mais consistente para operação contínua e mais preparado p
 Objetivo: ampliar a proposta de valor para clientes e gestão.
 
 #### Entregas
-- portal do tutor;
-- notificações automatizadas;
-- agenda online;
+- portal do tutor (web + mobile);
+- notificações push (mobile via FCM);
+- agenda online para tutores;
 - dashboards gerenciais;
 - relatórios avançados;
 - melhorias financeiras;
@@ -112,6 +127,7 @@ O sistema se posiciona como plataforma madura para operação complexa e expans�
 - prescrições
 - relatórios
 - portal do tutor
+- app mobile (consome a mesma API REST)
 
 ---
 
@@ -130,6 +146,7 @@ O sistema se posiciona como plataforma madura para operação complexa e expans�
 - prescrição
 - relatórios básicos
 - auditoria expandida
+- app mobile (Fase 2)
 
 ### Prioridade Baixa
 - integrações externas
@@ -145,7 +162,8 @@ O sistema se posiciona como plataforma madura para operação complexa e expans�
 - não definir claramente o que entra e o que fica fora;
 - misturar requisitos administrativos com clínicos sem separação;
 - não garantir isolamento entre workspaces;
-- não estruturar corretamente permissões.
+- não estruturar corretamente permissões;
+- projetar a API sem considerar consumo mobile desde o início.
 
 ---
 
@@ -159,6 +177,7 @@ O sistema se posiciona como plataforma madura para operação complexa e expans�
 - número de prontuários registrados.
 
 ### Fase 2
+- adoção do app mobile;
 - redução de erros operacionais;
 - aumento de adoção interna;
 - percentual de usuários com 2FA;
@@ -187,5 +206,5 @@ O roadmap deve ser revisado continuamente com base em:
 
 ---
 
-**Versão**: 1.0  
+**Versão**: 1.1
 **Última atualização**: 2026-04-28
