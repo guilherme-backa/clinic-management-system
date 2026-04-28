@@ -1,0 +1,67 @@
+name: clinic_mobile
+description: App mobile para gestão de clínicas veterinárias.
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # HTTP e API
+  dio: ^5.4.0
+  retrofit: ^4.1.0
+
+  # Estado
+  flutter_bloc: ^8.1.4
+  equatable: ^2.0.5
+
+  # Navegação
+  go_router: ^13.2.0
+
+  # Armazenamento seguro e local
+  flutter_secure_storage: ^9.0.0
+  shared_preferences: ^2.2.3
+
+  # Injeção de dependência
+  get_it: ^7.6.7
+  injectable: ^2.3.2
+
+  # Serialização
+  freezed_annotation: ^2.4.1
+  json_annotation: ^4.8.1
+
+  # Tratamento funcional de erros
+  dartz: ^0.10.1
+
+  # UI
+  cached_network_image: ^3.3.1
+  intl: ^0.20.2
+  flutter_localizations:
+    sdk: flutter
+
+  # Formulários
+  reactive_forms: ^17.0.0
+
+  # Autenticação biométrica
+  local_auth: ^2.2.0
+
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  mockito: ^5.4.4
+  build_runner: ^2.4.8
+  freezed: ^2.4.7
+  json_serializable: ^6.7.1
+  injectable_generator: ^2.4.1
+  retrofit_generator: ^8.1.0
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true

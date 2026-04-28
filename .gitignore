@@ -1,1 +1,52 @@
-# Dependencies\nnode_modules/\n/.pnp\n.pnp.js\n\n# Testing\n/coverage\n\n# Production\n/build\n/dist\n\n# Environment\n.env\n.env.local\n.env.*.local\n\n# IDE\n.vscode/\n.idea/\n*.swp\n*.swo\n*~\n.DS_Store\n\n# Logs\nlogs/\n*.log\nnpm-debug.log*\nyarn-debug.log*\nyarn-error.log*\n\n# Database\n*.db\n*.sqlite\n*.sqlite3\n\n# Build\ndist/\nbuild/\n\n# Package managers\npackage-lock.json\nyarn.lock\n
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/settings.json
+*.swp
+*.swo
+
+# Testing
+coverage/
+.nyc_output/
+
+# Flutter / Dart
+mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/.packages
+mobile/build/
+mobile/ios/Pods/
+mobile/ios/.symlinks/
+mobile/android/.gradle/
+mobile/android/captures/
+mobile/android/local.properties
+mobile/android/GeneratedPluginRegistrant.java
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+
+# Docker
+.docker/
