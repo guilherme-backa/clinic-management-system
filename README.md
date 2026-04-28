@@ -2,11 +2,11 @@
 
 **Sistema de Gestão para Clínicas Veterinárias**
 
-## 📋 Visão Geral
+## Visão Geral
 
 Plataforma completa de gestão para clínicas veterinárias com suporte a múltiplas unidades (workspaces), controle de acesso robusto e funcionalidades clínicas avançadas.
 
-## 🎯 Objetivos
+## Objetivos
 
 - Gerenciar múltiplas clínicas veterinárias
 - Controlar usuários com papéis e permissões granulares
@@ -16,9 +16,20 @@ Plataforma completa de gestão para clínicas veterinárias com suporte a múlti
 - Registrar vacinações e procedimentos
 - Gerar relatórios clínicos e financeiros
 
-## 📦 Módulos
+## Stack Tecnológica
 
-### 1. Módulo de Sistema e Gestão de Usuários 🔐
+| Camada | Tecnologia |
+|--------|-----------|
+| Backend | NestJS + TypeScript + Node.js 18 |
+| Banco de dados | PostgreSQL 14+ |
+| Cache | Redis 7+ |
+| Frontend Web | Next.js 14 + TailwindCSS |
+| App Mobile | Flutter 3.19+ / Dart 3.3+ (Android e iOS) |
+| Infraestrutura local | Docker Compose |
+
+## Módulos
+
+### 1. Módulo de Sistema e Gestão de Usuários
 - Arquitetura multi-tenant baseada em workspaces
 - Gestão de estabelecimentos (clínicas)
 - Controle de usuários com 7 tipos de papéis
@@ -27,18 +38,18 @@ Plataforma completa de gestão para clínicas veterinárias com suporte a múlti
 - Auditoria completa
 
 **Tipos de Usuários:**
-1. Super Admin - Acesso total ao sistema
-2. Workspace Owner - Proprietário da organização
-3. Establishment Owner - Proprietário da clínica
-4. Workspace Admin - Admin da organização
-5. Establishment Admin - Admin da clínica
-6. Veterinário - Profissional veterinário
-7. Recepcionista - Atendimento
-8. Funcionário - Staff geral
+1. Super Admin — acesso total ao sistema
+2. Workspace Owner — proprietário da organização
+3. Establishment Owner — proprietário da clínica
+4. Workspace Admin — admin da organização
+5. Establishment Admin — admin da clínica
+6. Veterinário — profissional veterinário
+7. Recepcionista — atendimento
+8. Funcionário — staff geral
 
 **Documentação**: [PRD-modulo-sistema-usuarios.md](docs/PRD-modulo-sistema-usuarios.md)
 
-### 2. Módulo de Clínica Veterinária 🏥
+### 2. Módulo de Clínica Veterinária
 - Gestão de responsáveis (tutores) e animais
 - Agendamento de consultas
 - Prontuários eletrônicos
@@ -52,7 +63,7 @@ Plataforma completa de gestão para clínicas veterinárias com suporte a múlti
 
 ---
 
-## 🏗️ Arquitetura Multi-tenant
+## Arquitetura Multi-tenant
 
 ```
 Workspace (organização)
@@ -68,56 +79,55 @@ Workspace (organização)
       └── Medical Records
 ```
 
-## 🔒 Segurança
+## Segurança
 
 - Autenticação 2FA (Email, SMS, Authenticator)
 - Senhas criptografadas com bcrypt
-- JWT tokens para autenticação
-- Rate limiting
+- JWT tokens para autenticação (access 15min + refresh 7 dias)
+- Tokens mobile armazenados via flutter_secure_storage
+- Rate limiting via Redis
 - Auditoria de todas as ações
 - Isolamento completo de dados multi-tenant
 - HTTPS/TLS obrigatório
 
-## 📈 Roadmap
+## Roadmap
 
-### Fase 1 (MVP)
-- Estrutura de dados
-- APIs básicas
-- Autenticação
-- Dashboard simples
+### Fase 1 (MVP) — Web
+- Estrutura de dados e APIs
+- Autenticação e permissões
+- Gestão de workspaces e clínicas
+- Operação clínica básica (tutor, animal, agenda, prontuário)
+- Dashboard web
 
-### Fase 2
-- Todas as APIs
+### Fase 2 — App Mobile + Consolidação
+- App Flutter nativo (Android e iOS)
 - 2FA avançado
 - Relatórios
-- Mobile app
+- Melhorias operacionais
 
-### Fase 3
+### Fase 3 — Expansão
+- Portal do cliente
+- Notificações push
+- Agenda online
+
+### Fase 4 — Plataforma Avançada
 - Integrações externas
 - Analytics avançado
-- Portal do cliente
-
-### Fase 4
-- IA e machine learning
 - Telemedicina
-- Marketplace de serviços
+- IA
 
-## 📚 Documentação
+## Documentação
 
-- [PRD - Módulo de Sistema e Usuários](docs/PRD-modulo-sistema-usuarios.md)
-- [PRD - Módulo de Clínica Veterinária](docs/PRD-modulo-clinica-veterinaria.md)
-
-## 🚀 Como Começar
-
-1. Leia os PRDs completos
-2. Crie as issues de desenvolvimento
-3. Configure o ambiente
-4. Inicie o desenvolvimento
-
-## 📞 Contato
-
-Para dúvidas sobre o projeto, entre em contato com o time de produto.
+- [Tech Stack](docs/tech-stack.md)
+- [Escopo do MVP](docs/mvp-scope.md)
+- [Roadmap Geral](docs/roadmap-geral.md)
+- [Requisitos Não Funcionais](docs/non-functional-requirements.md)
+- [Arquitetura de Banco de Dados](docs/database-architecture.md)
+- [Visão Geral de Módulos da API](docs/api-modules-overview.md)
+- [User Stories](docs/user-stories.md)
+- [PRD — Módulo de Sistema e Usuários](docs/PRD-modulo-sistema-usuarios.md)
+- [PRD — Módulo de Clínica Veterinária](docs/PRD-modulo-clinica-veterinaria.md)
 
 ---
 
-**v1.0** - 2026-04-28
+**v1.1** — 2026-04-28
