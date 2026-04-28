@@ -1,63 +1,50 @@
-# Tech Stack Recomendado
+# Tech Stack
 
-**Versão**: 1.0 | **Data**: 2026-04-28
+**Versão**: 1.1 | **Data**: 2026-04-28
 
 ---
 
-## 🏗️ Arquitetura Geral
+## Arquitetura Geral
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     FRONTEND (Web + Mobile)                  │
-│  React/Next.js | React Native | TypeScript | TailwindCSS    │
+│                   FRONTEND (Web + Mobile)                    │
+│         Next.js/React (Web) | Flutter/Dart (Mobile)         │
 └────────────────────────┬────────────────────────────────────┘
                          │ HTTPS/REST API
 ┌────────────────────────▼────────────────────────────────────┐
-│                    API GATEWAY / REVERSE PROXY               │
-│                    Nginx / CloudFlare                        │
+│                   API GATEWAY / REVERSE PROXY                │
+│                      Nginx / CloudFlare                      │
 └────────────────────────┬────────────────────────────────────┘
                          │
 ┌────────────────────────▼────────────────────────────────────┐
-│             MONÓLITO MODULAR (NestJS / Node.js)              │
+│            MONÓLITO MODULAR (NestJS / Node.js)               │
 │                                                              │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
 │  │   auth/      │  │  clinic/     │  │  workspace/  │      │
 │  │  (módulo)    │  │  (módulo)    │  │  (módulo)    │      │
 │  └──────────────┘  └──────────────┘  └──────────────┘      │
-│                                                              │
-│  Nota: arquitetura de microserviços é adiada para Fase 4.   │
-│  Módulos são separados internamente mas rodam no mesmo       │
-│  processo. A separação de domínios facilita extração futura. │
 └────────────────────────┬────────────────────────────────────┘
                          │
     ┌────────────────────▼───────────────────────┐
     │        BANCO DE DADOS / CACHE              │
-    │  PostgreSQL 14+ | Redis                    │
+    │       PostgreSQL 14+ | Redis 7+            │
     └────────────────────────────────────────────┘
 ```
 
 ---
 
-## 💻 Backend
+## Backend
 
 ### Linguagem & Runtime
 - **Node.js**: 18 LTS ou superior
-- **TypeScript**: Para type-safety
-- **Versão**: node:18-alpine (Docker)
+- **TypeScript**: para type-safety
+- **Docker image**: `node:18-alpine`
 
 ### Framework
-- **Opção 1**: NestJS ⭐ (Recomendado)
-  - Arquitetura modular
-  - Built-in dependency injection
-  - Excelente para escalabilidade
-  - Suporte a microserviços
-  
-- **Opção 2**: Express.js
-  - Simples e direto
-  - Muitos middlewares disponíveis
-  - Melhor para APIs pequenas
+- **NestJS** — arquitetura modular, dependency injection, suporte a microserviços no futuro
 
-### Dependências Principais
+### Dependências principais
 
 ```json
 {
@@ -67,6 +54,7 @@
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/passport": "^10.0.0",
     "@nestjs/typeorm": "^9.0.0",
+    "@nestjs/swagger": "^7.0.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.0",
     "typeorm": "^0.3.0",
@@ -74,392 +62,340 @@
     "redis": "^4.6.0",
     "bcrypt": "^5.1.0",
     "jsonwebtoken": "^9.0.0",
-    "dotenv": "^16.0.0",
     "class-validator": "^0.14.0",
     "class-transformer": "^0.5.0",
-    "joi": "^17.0.0",
     "pino": "^8.0.0",
     "swagger-ui-express": "^4.6.0"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "@types/express": "^4.17.0",
-    "@types/bcrypt": "^5.0.0",
-    "typescript": "^5.0.0",
-    "@nestjs/cli": "^10.0.0",
     "@nestjs/testing": "^10.0.0",
     "jest": "^29.0.0",
     "ts-jest": "^29.0.0",
-    "eslint": "^8.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
-    "@typescript-eslint/eslint-plugin": "^6.0.0"
-  }
-}
-```
-
-### Estrutura Backend
-
-```
-src/
-├── main.ts
-├── app.module.ts
-├── config/
-│   ├── database.ts
-│   ├── auth.ts
-│   ├── redis.ts
-│   └── jwt.ts
-├── common/
-│   ├── decorators/
-│   ├── guards/
-│   ├── pipes/
-│   ├── filters/
-│   ├── interceptors/
-│   └── middleware/
-├── modules/
-│   ├── auth/
-│   │   ├── auth.module.ts
-│   │   ├── auth.controller.ts
-│   │   ├── auth.service.ts
-│   │   ├── auth.strategy.ts
-│   │   └── dto/
-│   ├── users/
-│   │   ├── users.module.ts
-│   │   ├── users.controller.ts
-│   │   ├── users.service.ts
-│   │   └── entities/
-│   ├── workspaces/
-│   │   ├── workspaces.module.ts
-│   │   ├── workspaces.controller.ts
-│   │   ├── workspaces.service.ts
-│   │   └── entities/
-│   ├── establishments/
-│   ├── animals/
-│   ├── appointments/
-│   └── medical-records/
-├── database/
-│   ├── migrations/
-│   ├── seeds/
-│   └── entities/
-└── utils/
-    ├── validators/
-    ├── helpers/
-    └── constants/
-```
-
----
-
-## 🗄️ Banco de Dados
-
-### PostgreSQL
-- **Versão**: 14 ou superior
-- **Docker Image**: `postgres:14-alpine`
-- **Portas**: 5432
-
-### Client ORM
-- **TypeORM** (Recomendado)
-  - Suporte completo a PostgreSQL
-  - Migrações automáticas
-  - Query builder poderoso
-  
-```typescript
-// Exemplo de Entidade
-@Entity('users')
-export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Column({ unique: true })
-  email: string;
-
-  @Column()
-  password_hash: string;
-
-  @ManyToOne(() => Workspace)
-  workspace: Workspace;
-
-  @CreateDateColumn()
-  created_at: Date;
-
-  @UpdateDateColumn()
-  updated_at: Date;
-}
-```
-
-### Migrations
-```bash
-# Criar migration
-npm run typeorm migration:create src/database/migrations/CreateUsersTable
-
-# Executar migrations
-npm run typeorm migration:run
-
-# Reverter última migration
-npm run typeorm migration:revert
-```
-
----
-
-## 🔐 Autenticação & Segurança
-
-### JWT (JSON Web Tokens)
-- **Tokens de Acesso**: 15 minutos
-- **Tokens de Refresh**: 7 dias
-- **Algorithm**: HS256
-
-### Criptografia
-- **Senhas**: bcrypt com salt 10
-- **Dados Sensíveis**: AES-256 (se necessário)
-
-```typescript
-// Exemplo de serviço de autenticação
-@Injectable()
-export class AuthService {
-  constructor(private jwtService: JwtService) {}
-
-  async validateUser(email: string, password: string) {
-    const user = await this.usersService.findByEmail(email);
-    if (user && await bcrypt.compare(password, user.password_hash)) {
-      return user;
-    }
-    return null;
-  }
-
-  async login(user: User) {
-    const payload = { sub: user.id, email: user.email };
-    return {
-      access_token: this.jwtService.sign(payload, { expiresIn: '15m' }),
-      refresh_token: this.jwtService.sign(payload, { expiresIn: '7d' }),
-    };
-  }
-}
-```
-
----
-
-## 📦 Cache
-
-### Redis
-- **Versão**: 7.0+
-- **Docker Image**: `redis:7-alpine`
-- **Portas**: 6379
-
-### Uso
-- Sessions de usuário
-- Cache de dados frequentes
-- Rate limiting
-- Jobs em background
-
-```typescript
-// Exemplo com Redis
-constructor(private cacheManager: CacheManager) {}
-
-async getCachedData(key: string) {
-  let data = await this.cacheManager.get(key);
-  if (!data) {
-    data = await this.computeData();
-    await this.cacheManager.set(key, data, 3600); // 1 hora
-  }
-  return data;
-}
-```
-
----
-
-## 📝 Logging & Monitoring
-
-### Logging
-- **Pino**: Logger de alta performance
-- **Winston**: Alternativa com mais funcionalidades
-
-```typescript
-// Logger com Pino
-import pino from 'pino';
-
-const logger = pino({
-  level: process.env.LOG_LEVEL || 'info',
-  transport: {
-    target: 'pino-pretty',
-    options: {
-      colorize: true,
-      translateTime: 'SYS:standard',
-      ignore: 'pid,hostname',
-    },
-  },
-});
-```
-
-### Monitoring
-- **Prometheus**: Métricas de aplicação
-- **Grafana**: Visualização de métricas
-- **DataDog** ou **New Relic**: APM (opcional)
-
----
-
-## 🧪 Testes
-
-### Testes Unitários
-- **Jest**: Framework de testes
-- Cobertura: Mínimo 80%
-
-```typescript
-describe('AuthService', () => {
-  let service: AuthService;
-
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthService],
-    }).compile();
-
-    service = module.get<AuthService>(AuthService);
-  });
-
-  it('should hash password correctly', async () => {
-    const password = 'test123';
-    const hash = await service.hashPassword(password);
-    expect(await bcrypt.compare(password, hash)).toBe(true);
-  });
-});
-```
-
-### Testes de Integração
-- **Supertest**: Para testar endpoints HTTP
-- Banco de testes isolado
-
-```typescript
-describe('Auth Endpoints', () => {
-  it('POST /auth/login should return access token', async () => {
-    return request(app.getHttpServer())
-      .post('/auth/login')
-      .send({ email: 'test@test.com', password: 'password' })
-      .expect(200)
-      .expect((res) => {
-        expect(res.body).toHaveProperty('access_token');
-      });
-  });
-});
-```
-
----
-
-## 🎨 Frontend
-
-### Web
-- **Framework**: Next.js 14+ (React 18+)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **State Management**: TanStack Query + Zustand
-- **UI Components**: shadcn/ui + Radix UI
-
-### Mobile
-- **Framework**: React Native ou Flutter
-- **Package Manager**: npm/yarn
-- **State Management**: Redux Toolkit ou Zustand
-
-### Dependências Principais (Web)
-
-```json
-{
-  "dependencies": {
-    "next": "^14.0.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "@tanstack/react-query": "^5.0.0",
-    "@tanstack/react-router": "^1.0.0",
-    "zustand": "^4.0.0",
-    "axios": "^1.6.0",
-    "tailwindcss": "^3.0.0",
-    "@headlessui/react": "^1.7.0",
-    "lucide-react": "^0.0.0",
-    "zod": "^3.22.0",
-    "react-hook-form": "^7.48.0",
-    "date-fns": "^2.30.0"
-  },
-  "devDependencies": {
-    "@types/react": "^18.0.0",
-    "@types/node": "^20.0.0",
+    "supertest": "^6.0.0",
     "typescript": "^5.0.0",
     "eslint": "^8.0.0",
-    "prettier": "^3.0.0",
-    "@testing-library/react": "^14.0.0",
-    "@testing-library/jest-dom": "^6.0.0",
-    "vitest": "^1.0.0"
+    "@typescript-eslint/parser": "^6.0.0"
   }
 }
 ```
 
-### Estrutura Frontend
+### Estrutura de pastas
 
 ```
-src/
-├── app/
-│   ├── layout.tsx
-│   ├── page.tsx
-│   ├── auth/
-│   │   ├── login/page.tsx
-│   │   └── register/page.tsx
-│   ├── dashboard/
-│   │   ├── page.tsx
-│   │   ├── workspaces/page.tsx
-│   │   ├── establishments/page.tsx
-│   │   └── settings/page.tsx
-│   └── clinic/
-│       ├── animals/page.tsx
-│       ├── appointments/page.tsx
-│       └── medical-records/page.tsx
-├── components/
-│   ├── auth/
-│   ├── layout/
+backend/
+├── src/
+│   ├── main.ts
+│   ├── app.module.ts
+│   ├── config/
 │   ├── common/
-│   └── forms/
-├── hooks/
-│   ├── useAuth.ts
-│   ├── useWorkspace.ts
-│   └── useFetch.ts
-├── services/
-│   ├── api.ts
-│   ├── authService.ts
-│   └── apiClient.ts
-├── store/
-│   ├── authStore.ts
-│   ├── workspaceStore.ts
-│   └── uiStore.ts
-├── types/
-│   ├── index.ts
-│   ├── auth.ts
-│   └── clinic.ts
-├── utils/
-│   ├── validators.ts
-│   ├── formatters.ts
-│   └── constants.ts
-└── styles/
-    ├── globals.css
-    └── variables.css
+│   │   ├── decorators/
+│   │   ├── guards/
+│   │   ├── pipes/
+│   │   └── filters/
+│   ├── modules/
+│   │   ├── auth/
+│   │   ├── users/
+│   │   ├── workspaces/
+│   │   ├── establishments/
+│   │   ├── animals/
+│   │   ├── appointments/
+│   │   └── medical-records/
+│   └── database/
+│       ├── migrations/
+│       └── seeds/
+└── test/
 ```
 
 ---
 
-## 🐳 Docker & DevOps
+## Banco de Dados
 
-### Docker
-```dockerfile
-# Backend Dockerfile
-FROM node:18-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
+- **PostgreSQL 14+** — banco principal
+- **Redis 7+** — cache, sessões, rate limiting
+- **ORM**: TypeORM com migrations versionadas
 
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY --from=builder /app/dist ./dist
-EXPOSE 3000
-CMD ["node", "dist/main.js"]
+---
+
+## Autenticação
+
+- JWT (access token 15min, refresh token 7 dias)
+- bcrypt para senhas (salt 10)
+- Rate limiting via Redis (login: 10 tentativas / 15min por IP)
+
+---
+
+## Frontend Web
+
+- **Framework**: Next.js 14+ (React 18+)
+- **Linguagem**: TypeScript
+- **Estilo**: Tailwind CSS
+- **Componentes**: shadcn/ui + Radix UI
+- **Estado**: TanStack Query + Zustand
+- **Formulários**: React Hook Form + Zod
+- **HTTP**: Axios
+
+### Estrutura de pastas
+
+```
+frontend-web/
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx
+│   │   ├── auth/
+│   │   ├── dashboard/
+│   │   └── clinic/
+│   ├── components/
+│   ├── hooks/
+│   ├── services/
+│   ├── store/
+│   ├── types/
+│   └── utils/
+└── public/
 ```
 
-### Docker Compose
+---
+
+## Mobile (Flutter / Dart)
+
+### Decisão
+**Flutter com Dart** é a escolha definitiva para o app mobile nativo (Android e iOS).
+
+Motivações:
+- único codebase para Android e iOS com performance nativa;
+- widgets ricos adequados para formulários clínicos, calendários e listas complexas;
+- hot reload acelera o ciclo de desenvolvimento;
+- ecossistema maduro com pub.dev;
+- compilação AOT garante desempenho próximo ao nativo.
+
+### Versões
+- **Flutter**: 3.19+ (stable channel)
+- **Dart**: 3.3+
+
+### Dependências principais (pubspec.yaml)
+
+```yaml
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # HTTP e API
+  dio: ^5.4.0
+  retrofit: ^4.1.0
+
+  # Estado
+  flutter_bloc: ^8.1.4
+  equatable: ^2.0.5
+
+  # Navegação
+  go_router: ^13.2.0
+
+  # Armazenamento local
+  flutter_secure_storage: ^9.0.0
+  shared_preferences: ^2.2.3
+  sqflite: ^2.3.2
+
+  # UI e componentes
+  material_design_icons_flutter: ^7.0.7296
+  cached_network_image: ^3.3.1
+  intl: ^0.19.0
+  flutter_localizations:
+    sdk: flutter
+
+  # Formulários e validação
+  reactive_forms: ^17.0.0
+
+  # Autenticação
+  local_auth: ^2.2.0          # biometria
+  jwt_decoder: ^2.0.1
+
+  # Utilitários
+  get_it: ^7.6.7              # injeção de dependência
+  injectable: ^2.3.2
+  freezed_annotation: ^2.4.1
+  json_annotation: ^4.8.1
+  dartz: ^0.10.1              # Either / Option para tratamento de erros
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  mockito: ^5.4.4
+  build_runner: ^2.4.8
+  freezed: ^2.4.7
+  json_serializable: ^6.7.1
+  injectable_generator: ^2.4.1
+  retrofit_generator: ^8.1.0
+  flutter_lints: ^3.0.1
+```
+
+### Arquitetura Mobile (Clean Architecture)
+
+```
+mobile/
+├── lib/
+│   ├── main.dart
+│   ├── app/
+│   │   ├── app.dart
+│   │   └── router/
+│   │       └── app_router.dart
+│   ├── core/
+│   │   ├── di/                    # injeção de dependência
+│   │   ├── error/                 # failures e exceptions
+│   │   ├── network/               # cliente HTTP (Dio)
+│   │   ├── storage/               # local storage
+│   │   └── utils/
+│   ├── features/
+│   │   ├── auth/
+│   │   │   ├── data/
+│   │   │   │   ├── datasources/
+│   │   │   │   ├── models/
+│   │   │   │   └── repositories/
+│   │   │   ├── domain/
+│   │   │   │   ├── entities/
+│   │   │   │   ├── repositories/
+│   │   │   │   └── usecases/
+│   │   │   └── presentation/
+│   │   │       ├── bloc/
+│   │   │       ├── pages/
+│   │   │       └── widgets/
+│   │   ├── dashboard/
+│   │   ├── animals/
+│   │   ├── appointments/
+│   │   ├── medical_records/
+│   │   └── settings/
+│   └── shared/
+│       ├── theme/
+│       ├── widgets/
+│       └── extensions/
+├── test/
+│   ├── unit/
+│   ├── widget/
+│   └── helpers/
+├── integration_test/
+│   └── app_test.dart
+├── android/
+├── ios/
+└── pubspec.yaml
+```
+
+### Padrão de estado: BLoC
+
+```dart
+// Exemplo de BLoC para autenticação
+@injectable
+class AuthBloc extends Bloc<AuthEvent, AuthState> {
+  final LoginUseCase _loginUseCase;
+
+  AuthBloc(this._loginUseCase) : super(AuthInitial()) {
+    on<LoginRequested>(_onLoginRequested);
+  }
+
+  Future<void> _onLoginRequested(
+    LoginRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    final result = await _loginUseCase(
+      LoginParams(email: event.email, password: event.password),
+    );
+    result.fold(
+      (failure) => emit(AuthFailure(failure.message)),
+      (token)   => emit(AuthSuccess(token)),
+    );
+  }
+}
+```
+
+### Navegação: GoRouter
+
+```dart
+final appRouter = GoRouter(
+  initialLocation: '/login',
+  routes: [
+    GoRoute(path: '/login',     builder: (_, __) => const LoginPage()),
+    GoRoute(path: '/dashboard', builder: (_, __) => const DashboardPage()),
+    GoRoute(path: '/animals',   builder: (_, __) => const AnimalsPage()),
+    GoRoute(
+      path: '/animals/:id',
+      builder: (_, state) => AnimalDetailPage(id: state.pathParameters['id']!),
+    ),
+    GoRoute(path: '/appointments', builder: (_, __) => const AppointmentsPage()),
+  ],
+);
+```
+
+### Comunicação com a API
+
+```dart
+// Cliente Dio configurado
+@lazySingleton
+class ApiClient {
+  late final Dio dio;
+
+  ApiClient(this._storage) {
+    dio = Dio(BaseOptions(
+      baseUrl: AppConfig.apiBaseUrl,
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 30),
+    ));
+    dio.interceptors.add(AuthInterceptor(_storage));
+  }
+}
+
+// Interceptor JWT com refresh automático
+class AuthInterceptor extends Interceptor {
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+    final token = await _storage.read(key: 'access_token');
+    if (token != null) {
+      options.headers['Authorization'] = 'Bearer $token';
+    }
+    handler.next(options);
+  }
+}
+```
+
+### Testes Mobile
+
+```bash
+# Unitários e de widget
+flutter test
+
+# Com cobertura
+flutter test --coverage
+
+# Integração (emulador necessário)
+flutter test integration_test/app_test.dart
+```
+
+### Setup Flutter no Linux (Android)
+
+```bash
+# 1. Baixar Flutter SDK
+cd ~/development
+git clone https://github.com/flutter/flutter.git -b stable
+
+# 2. Adicionar ao PATH
+export PATH="$PATH:$HOME/development/flutter/bin"
+
+# 3. Verificar dependências
+flutter doctor
+
+# 4. Android Studio com plugin Flutter
+# Plugins: Flutter + Dart
+
+# 5. Criar emulador no Android Studio
+# Device Manager → Create Virtual Device → Pixel 7 → API 34
+
+# 6. Rodar o app
+cd mobile
+flutter run
+```
+
+---
+
+## Docker Compose (ambiente local completo)
 
 ```yaml
 version: '3.8'
@@ -487,14 +423,15 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/clinic_db
       REDIS_URL: redis://redis:6379
+      JWT_SECRET: change-me-in-production
     depends_on:
       - postgres
       - redis
     volumes:
-      - ./backend:/app
+      - ./backend/src:/app/src
 
-  frontend:
-    build: ./frontend
+  frontend-web:
+    build: ./frontend-web
     ports:
       - "3001:3000"
     depends_on:
@@ -504,36 +441,12 @@ volumes:
   postgres_data:
 ```
 
-### Kubernetes
-```yaml
-apiVersion: v1
-kind: Deployment
-metadata:
-  name: clinic-backend
-spec:
-  replicas: 3
-  template:
-    spec:
-      containers:
-      - name: backend
-        image: clinic-backend:latest
-        ports:
-        - containerPort: 3000
-        env:
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: clinic-secrets
-              key: database-url
-```
-
 ---
 
-## 🚀 CI/CD
+## CI/CD (GitHub Actions)
 
-### GitHub Actions
 ```yaml
-name: CI/CD Pipeline
+name: CI
 
 on:
   push:
@@ -542,62 +455,64 @@ on:
     branches: [main, develop]
 
 jobs:
-  test:
+  backend:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '18'
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run test
-      - run: npm run test:cov
+      - run: cd backend && npm ci
+      - run: cd backend && npm run lint
+      - run: cd backend && npm run test:cov
 
-  build:
+  frontend-web:
     runs-on: ubuntu-latest
-    needs: test
     steps:
-      - uses: actions/checkout@v3
-      - run: docker build -t clinic-backend .
-      - run: docker push clinic-backend
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - run: cd frontend-web && npm ci
+      - run: cd frontend-web && npm run lint
+      - run: cd frontend-web && npm run test
+
+  mobile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: stable
+      - run: cd mobile && flutter pub get
+      - run: cd mobile && flutter analyze
+      - run: cd mobile && flutter test --coverage
 ```
+
+> Build de release iOS requer runner macOS (via GitHub Actions ou serviço dedicado).
 
 ---
 
-## 📊 APIs & Documentação
+## Logging e Monitoramento
 
-### Swagger/OpenAPI
-```bash
-npm install @nestjs/swagger swagger-ui-express
-```
-
-```typescript
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-
-const config = new DocumentBuilder()
-  .setTitle('Clinic Management API')
-  .setDescription('API para gerenciar clínicas veterinárias')
-  .setVersion('1.0')
-  .addBearerAuth()
-  .build();
-
-const document = SwaggerModule.createDocument(app, config);
-SwaggerModule.setup('api/docs', app, document);
-```
+- **Backend**: Pino (structured JSON logs)
+- **Monitoramento**: Prometheus + Grafana
+- **APM (opcional)**: DataDog ou New Relic
 
 ---
 
-## 📋 Checklist de Setup
+## Checklist de Setup Local
 
 - [ ] Node.js 18+ instalado
-- [ ] PostgreSQL 14+ instalado
-- [ ] Redis 7+ instalado
-- [ ] Docker & Docker Compose
-- [ ] Git configurado
-- [ ] Editor (VS Code recomendado)
-- [ ] Extensões: ESLint, Prettier, Thunder Client
+- [ ] Docker e Docker Compose instalados
+- [ ] Flutter SDK 3.19+ instalado (stable channel)
+- [ ] Android Studio instalado com plugins Flutter e Dart
+- [ ] Emulador Android configurado (Pixel 7, API 34)
+- [ ] `flutter doctor` sem erros críticos
+- [ ] VS Code com extensões: ESLint, Prettier, Flutter, Dart
+- [ ] Git configurado com SSH
 
 ---
 
-**Versão**: 1.0 | **Última atualização**: 2026-04-28
+**Versão**: 1.1 | **Última atualização**: 2026-04-28
