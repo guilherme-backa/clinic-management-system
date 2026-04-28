@@ -33,6 +33,12 @@ A aplicação deve suportar crescimento progressivo sem reescrita estrutural ime
 
 ## 2. Segurança
 
+### RNF-SEG-000 (Rate Limiting)
+O sistema deve aplicar rate limiting nas rotas de autenticação e nas APIs públicas:
+- login: máximo 10 tentativas por IP em janela de 15 minutos;
+- APIs autenticadas: máximo 300 requisições por usuário por minuto;
+- implementado via Redis.
+
 ### RNF-SEG-001
 Toda autenticação deve ocorrer por conexão segura (HTTPS).
 

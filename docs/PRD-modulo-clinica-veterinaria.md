@@ -31,7 +31,7 @@ Owner {
   user_id: UUID (FK - pode ser nulo se cliente não tiver conta)
   first_name: String
   last_name: String
-  email: String
+  email: String (único por establishment_id)
   cpf: String (único)
   phone: String (obrigatório)
   phone_secondary: String
@@ -66,7 +66,7 @@ Animal {
   birthdate: Date
   age_months: Integer (calculado)
   weight_kg: Decimal
-  microchip_id: String (único globalmente)
+  microchip_id: String (único no banco; o microchip é físico e deve ser globalmente único — unicidade enforçada sem escopo de establishment)
   registration_number: String
   gender: MALE | FEMALE
   castrated: Boolean
@@ -93,8 +93,7 @@ Appointment {
   animal_id: UUID (FK)
   owner_id: UUID (FK)
   veterinarian_id: UUID (FK - User)
-  scheduled_date: DateTime (obrigatório)
-  scheduled_time: Time
+  scheduled_at: DateTime (obrigatório - data e hora unificadas; armazenar em UTC)
   duration_minutes: Integer (default: 30)
   appointment_type: CONSULTATION | VACCINATION | SURGERY | GROOMING | BOARDING | OTHERS
   status: SCHEDULED | CONFIRMED | IN_PROGRESS | COMPLETED | CANCELLED | NO_SHOW
@@ -130,7 +129,7 @@ MedicalRecord {
   temperature_celsius: Decimal
   heart_rate_bpm: Integer
   respiratory_rate: Integer
-  diagnosis: String[]
+  diagnosis: String[] (texto livre no MVP; sem padronização CID — limitação que impacta relatórios de "doenças mais frequentes", previsto para revisão na Fase 2)
   differential_diagnosis: String[]
   findings: Text
   treatment_plan: Text
@@ -150,8 +149,9 @@ MedicalRecord {
 ```
 Prescription {
   id: UUID (PK)
-  medical_record_id: UUID (FK)
+  medical_record_id: UUID (FK - nullable quando prescrição avulsa)
   animal_id: UUID (FK)
+  veterinarian_id: UUID (FK - User, obrigatório)
   medication_name: String (obrigatório)
   dosage: String (ex: "500mg")
   unit: String (mg, ml, g, etc)
@@ -316,6 +316,7 @@ WaitingList {
   preferred_time_end: Time (nullable)
   priority: LOW | NORMAL | HIGH | URGENT
   status: WAITING | SCHEDULED | CANCELLED | EXPIRED
+  expires_at: DateTime (nullable - define quando o registro transita automaticamente para EXPIRED)
   notes: Text
   created_at: Timestamp
   updated_at: Timestamp
@@ -544,6 +545,11 @@ WAITING ──► SCHEDULED (quando agendamento é criado a partir da fila)
 - `rooms.update`
 - `rooms.delete`
 
+### Notifications (Notificações)
+- `notifications.create`
+- `notifications.read`
+- `notifications.manage`
+
 ### Billing (Faturamento Simbólico)
 - `billing.read`
 - `billing.update`
@@ -568,14 +574,15 @@ WAITING ──► SCHEDULED (quando agendamento é criado a partir da fila)
 8. A data de vacinação não pode ser futura.
 9. O sistema deve verificar alergias registradas do animal antes de confirmar uma prescrição ou vacinação (alerta, não bloqueio obrigatório).
 10. Serviços são cadastrados por `establishment`; o tipo do agendamento deve ser coerente com a categoria dos serviços selecionados.
-11. A sala (`Room`) deve estar disponível (sem conflito de horário) para que o agendamento seja confirmado.
+11. A sala (`Room`) deve estar disponível (sem conflito de horário) para que o agendamento seja confirmado. Registros com `deleted_at` preenchido não contam para verificação de conflito de sala ou veterinário.
 12. Um tutor possui um único vínculo com cada animal (`owner_id`). Co-tutoria não é suportada no MVP.
 13. O `BillingRecord` é criado automaticamente quando um agendamento é finalizado (`COMPLETED`), consolidando os serviços prestados.
-14. O `payment_status` do `Appointment` e do `BillingRecord` devem ser mantidos sincronizados.
+14. O `payment_status` do `Appointment` e do `BillingRecord` devem ser mantidos sincronizados. A atualização deve ocorrer via service layer da aplicação: ao atualizar `BillingRecord.payment_status`, o `Appointment.payment_status` é atualizado na mesma transação, e vice-versa.
 15. Catálogos de medicamentos e vacinas marcados como globais (sem `establishment_id`) são visíveis para todos os establishments; catálogos locais são visíveis apenas para o establishment que os criou.
 16. Notificações de lembrete de consulta devem respeitar a preferência de canal do tutor (`notification_preference` em `Owner`).
 17. Documentos gerados (`VetDocument`) ficam associados ao prontuário e só podem ser excluídos pelo veterinário autor ou por permissão elevada.
 18. Ações críticas sobre prontuários, prescrições, vacinações e documentos emitidos devem ser auditadas via `AuditLog`.
+19. O campo `cost` do `VeterinaryProcedure` representa custo de execução interno (insumos, tempo cirúrgico, etc.) e não é somado automaticamente ao `BillingRecord`. Custos cobráveis de procedimentos devem ser cadastrados como `Service` e vinculados via `AppointmentService`.
 
 ---
 

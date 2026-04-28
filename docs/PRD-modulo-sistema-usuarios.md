@@ -127,6 +127,7 @@ Establishment {
   razao_social: string
   status: ACTIVE | INACTIVE | CLOSED
   opening_date: date
+  timezone: string (ex: "America/Sao_Paulo" - obrigatório; usado para exibição e cálculo de agendamentos)
   operating_hours: json
   settings: json
   address: json
@@ -231,6 +232,8 @@ Invitation {
   status: PENDING | ACCEPTED | EXPIRED | DECLINED
   invited_by_id: UUID
   accepted_by_id: UUID | null
+  additional_permissions: string[] (permissões extras além do papel — replicadas para WorkspaceUser/EstablishmentUser ao aceitar)
+  denied_permissions: string[] (permissões negadas além do papel — replicadas ao aceitar)
   created_at: timestamp
   expires_at: timestamp
   accepted_at: timestamp | null

@@ -13,25 +13,27 @@
 └────────────────────────┬────────────────────────────────────┘
                          │ HTTPS/REST API
 ┌────────────────────────▼────────────────────────────────────┐
-│                    API GATEWAY / LOAD BALANCER               │
-│              Nginx / AWS ALB / CloudFlare                    │
+│                    API GATEWAY / REVERSE PROXY               │
+│                    Nginx / CloudFlare                        │
 └────────────────────────┬────────────────────────────────────┘
                          │
 ┌────────────────────────▼────────────────────────────────────┐
-│                    BACKEND SERVICES                          │
-│  Node.js/Express | NestJS | Docker | Kubernetes             │
+│             MONÓLITO MODULAR (NestJS / Node.js)              │
 │                                                              │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │   Auth       │  │  Clinic      │  │  Admin       │      │
-│  │  Service     │  │  Service     │  │  Service     │      │
+│  │   auth/      │  │  clinic/     │  │  workspace/  │      │
+│  │  (módulo)    │  │  (módulo)    │  │  (módulo)    │      │
 │  └──────────────┘  └──────────────┘  └──────────────┘      │
+│                                                              │
+│  Nota: arquitetura de microserviços é adiada para Fase 4.   │
+│  Módulos são separados internamente mas rodam no mesmo       │
+│  processo. A separação de domínios facilita extração futura. │
 └────────────────────────┬────────────────────────────────────┘
-         │               │               │
-         ▼               ▼               ▼
-    ┌────────────────────────────────────────┐
-    │        BANCO DE DADOS                  │
-    │  PostgreSQL 14+ | Redis | Elasticsearch│
-    └────────────────────────────────────────┘
+                         │
+    ┌────────────────────▼───────────────────────┐
+    │        BANCO DE DADOS / CACHE              │
+    │  PostgreSQL 14+ | Redis                    │
+    └────────────────────────────────────────────┘
 ```
 
 ---
