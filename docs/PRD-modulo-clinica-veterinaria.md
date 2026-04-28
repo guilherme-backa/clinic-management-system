@@ -1,6 +1,6 @@
 # PRD - Módulo de Clínica Veterinária
 
-**Versão**: 1.0 | **Data**: 2026-04-28 | **Status**: Em Desenvolvimento
+**Versão**: 1.1 | **Data**: 2026-04-28 | **Status**: Em Desenvolvimento
 
 ---
 
@@ -105,8 +105,9 @@ Appointment {
   reminder_sent_at: Timestamp
   reminder_method: EMAIL | SMS | WHATSAPP | PHONE | NONE
   notes: Text
-  payment_status: UNPAID | PARTIALLY_PAID | PAID
-  treatment_room: String
+  payment_status: UNPAID | PARTIALLY_PAID | PAID | WAIVED
+  treatment_room_id: UUID (FK - Room, nullable)
+  treatment_room: String (nome da sala - redundância para legibilidade)
   created_at: Timestamp
   updated_at: Timestamp
   deleted_at: Timestamp (soft delete)
@@ -282,6 +283,400 @@ AppointmentService {
   updated_at: Timestamp
 }
 ```
+
+### 11. Room (Sala/Espaço de Atendimento)
+```
+Room {
+  id: UUID (PK)
+  establishment_id: UUID (FK)
+  name: String (obrigatório - ex: "Sala 1", "Centro Cirúrgico")
+  description: Text
+  capacity: Integer (default: 1)
+  active: Boolean
+  created_at: Timestamp
+  updated_at: Timestamp
+}
+```
+
+> **Nota**: o campo `treatment_room` do `Appointment` referencia o nome ou `id` de um `Room`. Isso permite validar conflito de sala no momento do agendamento.
+
+---
+
+### 12. WaitingList (Fila de Espera)
+```
+WaitingList {
+  id: UUID (PK)
+  establishment_id: UUID (FK)
+  animal_id: UUID (FK)
+  owner_id: UUID (FK)
+  veterinarian_id: UUID (FK - nullable, se sem preferência)
+  appointment_type: CONSULTATION | VACCINATION | SURGERY | GROOMING | BOARDING | OTHERS
+  preferred_date: Date (nullable)
+  preferred_time_start: Time (nullable)
+  preferred_time_end: Time (nullable)
+  priority: LOW | NORMAL | HIGH | URGENT
+  status: WAITING | SCHEDULED | CANCELLED | EXPIRED
+  notes: Text
+  created_at: Timestamp
+  updated_at: Timestamp
+}
+```
+
+---
+
+### 13. MedicationCatalog (Catálogo de Medicamentos)
+```
+MedicationCatalog {
+  id: UUID (PK)
+  establishment_id: UUID (FK - nullable para medicamentos globais)
+  name: String (obrigatório)
+  active_ingredient: String
+  category: String (antibiótico, anti-inflamatório, analgésico, vacina, etc)
+  presentations: String[] (comprimido, solução, injeção, etc)
+  available_routes: String[] (ORAL, IV, IM, TOPICAL, etc)
+  species_indicated: String[] (Cão, Gato, etc)
+  contraindicated_species: String[] (nullable)
+  standard_dosage_reference: String (referência de dosagem por espécie/peso)
+  active: Boolean
+  created_at: Timestamp
+  updated_at: Timestamp
+}
+```
+
+---
+
+### 14. VaccineCatalog (Catálogo de Vacinas)
+```
+VaccineCatalog {
+  id: UUID (PK)
+  establishment_id: UUID (FK - nullable para vacinas globais)
+  name: String (obrigatório)
+  vaccine_code: String
+  manufacturer: String
+  species_indicated: String[]
+  diseases_prevented: String[]
+  recommended_dose_interval_days: Integer
+  booster_required: Boolean
+  route: INTRAMUSCULAR | SUBCUTANEOUS | INTRANASAL | ORAL
+  active: Boolean
+  created_at: Timestamp
+  updated_at: Timestamp
+}
+```
+
+---
+
+### 15. Notification (Notificação)
+```
+Notification {
+  id: UUID (PK)
+  establishment_id: UUID (FK)
+  recipient_user_id: UUID (FK - nullable)
+  recipient_owner_id: UUID (FK - nullable)
+  type: APPOINTMENT_REMINDER | APPOINTMENT_CONFIRMATION | APPOINTMENT_CANCELLATION |
+        EXAM_RESULT_READY | VACCINATION_DUE | PRESCRIPTION_EXPIRING |
+        FOLLOW_UP_DUE | GENERAL
+  channel: EMAIL | SMS | WHATSAPP | PUSH | IN_APP
+  status: PENDING | SENT | FAILED | READ
+  title: String
+  body: Text
+  sent_at: Timestamp (nullable)
+  read_at: Timestamp (nullable)
+  reference_type: String (ex: "Appointment", "VeterinaryExam")
+  reference_id: UUID (nullable)
+  created_at: Timestamp
+  updated_at: Timestamp
+}
+```
+
+---
+
+### 16. VetDocument (Documento Emitido)
+```
+VetDocument {
+  id: UUID (PK)
+  establishment_id: UUID (FK)
+  animal_id: UUID (FK)
+  medical_record_id: UUID (FK - nullable)
+  veterinarian_id: UUID (FK)
+  document_type: CLINICAL_REPORT | HEALTH_CERTIFICATE | PRESCRIPTION | VACCINATION_CERTIFICATE | REFERRAL | OTHERS
+  title: String
+  content: Text (conteúdo gerado)
+  file_url: String (URL do PDF gerado)
+  signed_by: String (nome do veterinário responsável)
+  signed_at: Timestamp (nullable)
+  valid_until: Date (nullable)
+  issued_at: Timestamp
+  created_at: Timestamp
+  updated_at: Timestamp
+}
+```
+
+---
+
+### 17. BillingRecord (Registro Simbólico de Faturamento)
+
+> **Escopo**: Dados simbólicos de custo e receita por atendimento para fins de controle interno e relatórios gerenciais. Não inclui emissão de nota fiscal, gateway de pagamento ou módulo financeiro completo.
+
+```
+BillingRecord {
+  id: UUID (PK)
+  establishment_id: UUID (FK)
+  appointment_id: UUID (FK)
+  animal_id: UUID (FK)
+  owner_id: UUID (FK)
+  subtotal: Decimal (soma dos serviços)
+  discount_total: Decimal (descontos aplicados)
+  total_amount: Decimal (valor final)
+  payment_status: UNPAID | PARTIALLY_PAID | PAID | WAIVED
+  payment_method: CASH | CARD_DEBIT | CARD_CREDIT | PIX | BANK_TRANSFER | HEALTH_PLAN | OTHER (simbólico)
+  amount_paid: Decimal
+  amount_due: Decimal (calculado)
+  notes: Text
+  created_at: Timestamp
+  updated_at: Timestamp
+}
+```
+
+---
+
+## ⚙️ Máquina de Estados
+
+### Appointment.status
+```
+SCHEDULED ──► CONFIRMED ──► IN_PROGRESS ──► COMPLETED
+     │              │              │
+     └──────────────┴──────────────┴──► CANCELLED
+                                   └──► NO_SHOW
+```
+**Transições permitidas**:
+- `SCHEDULED` → `CONFIRMED` (confirmação pelo tutor ou recepcionista)
+- `SCHEDULED` → `CANCELLED` (cancelamento antes da confirmação)
+- `CONFIRMED` → `IN_PROGRESS` (início do atendimento pelo veterinário)
+- `CONFIRMED` → `CANCELLED` (cancelamento após confirmação, requer motivo)
+- `CONFIRMED` → `NO_SHOW` (paciente não compareceu)
+- `IN_PROGRESS` → `COMPLETED` (atendimento finalizado com prontuário salvo)
+- `IN_PROGRESS` → `CANCELLED` (situação excepcional, requer motivo e permissão elevada)
+
+**Regra**: nenhuma transição retroativa é permitida (ex: COMPLETED → SCHEDULED).
+
+---
+
+### VeterinaryExam.result_status
+```
+PENDING ──► IN_PROGRESS ──► COMPLETED
+   │                │
+   └────────────────┴──► CANCELLED
+```
+
+### WaitingList.status
+```
+WAITING ──► SCHEDULED (quando agendamento é criado a partir da fila)
+   └──► CANCELLED
+   └──► EXPIRED (após prazo definido sem agendamento)
+```
+
+---
+
+## 🔐 Permissões
+
+### Owners (Tutores)
+- `owners.create`
+- `owners.read`
+- `owners.update`
+- `owners.delete`
+
+### Animals (Pacientes)
+- `animals.create`
+- `animals.read`
+- `animals.update`
+- `animals.delete`
+- `animals.view_history`
+
+### Appointments (Agendamentos)
+- `appointments.create`
+- `appointments.read`
+- `appointments.update`
+- `appointments.cancel`
+- `appointments.manage_status`
+
+### Medical Records (Prontuários)
+- `medical_records.create`
+- `medical_records.read`
+- `medical_records.update`
+- `medical_records.delete` (apenas soft delete, permissão restrita)
+
+### Prescriptions (Prescrições)
+- `prescriptions.issue`
+- `prescriptions.read`
+- `prescriptions.update`
+
+### Vaccinations (Vacinações)
+- `vaccinations.register`
+- `vaccinations.read`
+- `vaccinations.update`
+
+### Exams (Exames)
+- `exams.request`
+- `exams.read`
+- `exams.update_result`
+- `exams.cancel`
+
+### Procedures (Procedimentos)
+- `procedures.register`
+- `procedures.read`
+- `procedures.update`
+
+### Services (Serviços)
+- `services.create`
+- `services.read`
+- `services.update`
+- `services.delete`
+
+### Documents (Documentos)
+- `documents.generate`
+- `documents.read`
+- `documents.delete`
+
+### Rooms (Salas)
+- `rooms.create`
+- `rooms.read`
+- `rooms.update`
+- `rooms.delete`
+
+### Billing (Faturamento Simbólico)
+- `billing.read`
+- `billing.update`
+
+### Reports (Relatórios)
+- `reports.view_operational`
+- `reports.view_clinical`
+- `reports.view_financial`
+- `reports.export`
+
+---
+
+## 🪜 Regras de Negócio
+
+1. Um animal só pode ter um agendamento com status `IN_PROGRESS` por vez.
+2. O prontuário (`MedicalRecord`) só pode ser criado quando o agendamento associado está em status `IN_PROGRESS` ou `COMPLETED`.
+3. Um veterinário só pode atender animais do seu `establishment`.
+4. O cancelamento de agendamento requer motivo quando o status já for `CONFIRMED` ou superior.
+5. Prontuários não podem ser deletados permanentemente — apenas soft delete, com log de auditoria obrigatório.
+6. Prontuários só podem ser editados pelo veterinário autor dentro de 24h após a criação; após isso, requer permissão especial.
+7. Prescrições são geradas sempre vinculadas a um prontuário e a um animal.
+8. A data de vacinação não pode ser futura.
+9. O sistema deve verificar alergias registradas do animal antes de confirmar uma prescrição ou vacinação (alerta, não bloqueio obrigatório).
+10. Serviços são cadastrados por `establishment`; o tipo do agendamento deve ser coerente com a categoria dos serviços selecionados.
+11. A sala (`Room`) deve estar disponível (sem conflito de horário) para que o agendamento seja confirmado.
+12. Um tutor possui um único vínculo com cada animal (`owner_id`). Co-tutoria não é suportada no MVP.
+13. O `BillingRecord` é criado automaticamente quando um agendamento é finalizado (`COMPLETED`), consolidando os serviços prestados.
+14. O `payment_status` do `Appointment` e do `BillingRecord` devem ser mantidos sincronizados.
+15. Catálogos de medicamentos e vacinas marcados como globais (sem `establishment_id`) são visíveis para todos os establishments; catálogos locais são visíveis apenas para o establishment que os criou.
+16. Notificações de lembrete de consulta devem respeitar a preferência de canal do tutor (`notification_preference` em `Owner`).
+17. Documentos gerados (`VetDocument`) ficam associados ao prontuário e só podem ser excluídos pelo veterinário autor ou por permissão elevada.
+18. Ações críticas sobre prontuários, prescrições, vacinações e documentos emitidos devem ser auditadas via `AuditLog`.
+
+---
+
+## 📱 Telas Principais
+
+### 1. Dashboard Operacional da Clínica
+- Agenda do dia (agendamentos por hora/veterinário)
+- Indicadores rápidos: consultas do dia, pendentes, concluídas, cancelamentos
+- Alertas: fila de espera, exames pendentes, próximas vacinações
+
+### 2. Agenda (Calendário)
+- Visualização por dia, semana ou mês
+- Filtro por veterinário e sala
+- Criação/edição de agendamentos diretamente no calendário
+- Indicação visual de status por cor
+
+### 3. Fila de Espera
+- Lista de pacientes aguardando agendamento
+- Filtro por prioridade, veterinário e tipo de atendimento
+- Ação para converter em agendamento
+
+### 4. Ficha do Tutor
+- Dados cadastrais
+- Lista de animais vinculados
+- Histórico de atendimentos
+- Notificações e preferências de contato
+
+### 5. Ficha do Animal
+- Dados do paciente (espécie, raça, idade, peso atual)
+- Histórico de consultas e prontuários
+- Histórico de vacinações
+- Histórico de exames
+- Histórico de prescrições
+- Histórico de procedimentos
+- Documentos emitidos
+
+### 6. Tela de Atendimento
+- Dados do animal e tutor
+- Abertura/edição do prontuário ativo
+- Registro de sinais vitais
+- Diagnóstico e plano de tratamento
+- Solicitação de exames
+- Emissão de prescrição
+- Registro de vacinação e procedimentos
+- Finalização do atendimento
+
+### 7. Prontuário
+- Visualização completa de um atendimento
+- Exames e resultados vinculados
+- Prescrições emitidas
+- Procedimentos realizados
+- Documentos gerados
+
+### 8. Gestão de Serviços
+- Lista de serviços da clínica
+- Criação/edição/ativação de serviços
+- Precificação por serviço
+
+### 9. Gestão de Salas
+- Lista de salas
+- Criação/edição/ativação de salas
+- Ocupação por horário
+
+### 10. Faturamento (Simbólico)
+- Resumo de receita por período
+- Lista de atendimentos com status de pagamento
+- Edição do status de pagamento por atendimento
+- Filtro por veterinário, serviço e período
+
+### 11. Relatórios
+- Relatório operacional (consultas, taxa de ocupação, no-show)
+- Relatório clínico (diagnósticos, vacinas, exames)
+- Relatório de faturamento simbólico (receita por período/serviço/veterinário)
+
+---
+
+## 📁 Política de Upload de Arquivos
+
+### Tipos aceitos
+- Imagens: `image/jpeg`, `image/png`, `image/webp` (fotos de animais, anexos de prontuário)
+- Documentos: `application/pdf` (exames, receituários, atestados, certificados)
+
+### Limites
+- Foto de animal: máximo 5MB
+- Anexos de prontuário e exames: máximo 20MB por arquivo
+- Documentos gerados (PDF): sem limite de tamanho (gerados pelo sistema)
+
+### Regras
+- Arquivos são armazenados com URL pública protegida por token temporário (pre-signed URL ou equivalente).
+- Acesso a arquivos de prontuários e exames requer autenticação e permissão no establishment.
+- Arquivos vinculados a um prontuário são mantidos mesmo após soft delete do prontuário.
+
+---
+
+## 🛡️ LGPD e Dados Sensíveis
+
+- Prontuários, diagnósticos, prescrições e histórico clínico do animal são considerados **dados sensíveis** e devem ser armazenados com controle de acesso granular.
+- O tutor tem o direito de solicitar **exportação** do histórico clínico do animal (suportado em Fase 3).
+- Prontuários não podem ser excluídos permanentemente; o prazo mínimo de retenção seguirá regulamentação aplicável (referência: CFMV).
+- Todas as alterações em prontuários devem gerar entrada em `AuditLog` com `changes_before` e `changes_after`.
+- Dados de identificação do tutor (CPF, email, telefone) devem ser acessíveis apenas por usuários com permissão explícita.
 
 ---
 
@@ -508,6 +903,26 @@ AppointmentService {
 
 ---
 
+### Fluxo 11: Registrar Faturamento Simbólico
+```
+1. Atendimento é finalizado (status COMPLETED)
+2. Sistema cria automaticamente um BillingRecord com os serviços do AppointmentService
+3. Sistema calcula subtotal, descontos e total_amount
+4. Recepcionista revisa e confirma valores
+5. Recepcionista registra método de pagamento simbólico (cash, pix, cartão, etc)
+6. Atualiza amount_paid e payment_status (UNPAID, PARTIALLY_PAID ou PAID)
+7. Registro fica disponível nos relatórios financeiros simbólicos
+```
+
+**Validações**:
+- Agendamento deve estar com status COMPLETED
+- total_amount deve ser maior ou igual a zero
+- payment_method obrigatório se payment_status for PAID ou PARTIALLY_PAID
+
+> **Nota**: Este fluxo não inclui emissão de nota fiscal, integração com gateway de pagamento ou conciliação bancária. É um registro de controle interno.
+
+---
+
 ## 📱 Casos de Uso
 
 ### UC-CL-001: Recepcionista
@@ -516,9 +931,10 @@ AppointmentService {
 3. Agendar consultas
 4. Confirmar/cancelar agendamentos
 5. Registrar chegada do paciente
-6. Coletar pagamento
-7. Emitir comprovante/recibo
+6. Registrar pagamento simbólico (método e status)
+7. Emitir comprovante simples (PDF gerado pelo sistema)
 8. Enviar lembretes de agendamento
+9. Gerenciar fila de espera
 
 ### UC-CL-002: Veterinário
 1. Visualizar agenda de atendimentos
@@ -585,25 +1001,33 @@ AppointmentService {
 - [ ] APIs de animals CRUD
 - [ ] APIs de owners CRUD
 - [ ] APIs de appointments CRUD
+- [ ] APIs de rooms CRUD
 - [ ] APIs de medical records (prontuário)
+- [ ] APIs de services CRUD
+- [ ] Catálogos de medicamentos e vacinas (base)
+- [ ] Faturamento simbólico (BillingRecord)
 - [ ] Dashboard básico
 - [ ] Tela de atendimento
 
 ### Fase 2
-- [ ] Prescrições e medicamentos
-- [ ] Vacinações
+- [ ] Prescrições e medicamentos (catálogo completo)
+- [ ] Vacinações (catálogo completo)
 - [ ] Exames e resultados
 - [ ] Procedimentos/Cirurgias
-- [ ] Relatórios avançados
+- [ ] Fila de espera (WaitingList)
+- [ ] Documentos emitidos (VetDocument)
+- [ ] Notificações básicas (EMAIL/SMS)
+- [ ] Relatórios operacionais e financeiros simbólicos
 - [ ] Integração com laboratórios
 
 ### Fase 3
 - [ ] Portal do cliente (web)
 - [ ] App mobile para clientes
-- [ ] Lembretes automáticos (SMS/Email)
+- [ ] Lembretes automáticos avançados (SMS/Email/WhatsApp)
 - [ ] Chat com clínica
 - [ ] Agendamento online pelo cliente
-- [ ] Integração com gateway de pagamento
+- [ ] Exportação de histórico clínico (LGPD)
+- [ ] Integração com gateway de pagamento (módulo financeiro completo)
 
 ### Fase 4
 - [ ] IA para sugestão de diagnóstico
@@ -623,9 +1047,15 @@ AppointmentService {
 - [ ] Manual do usuário (Vet, Recepcionista, Admin)
 - [ ] Nenhuma vulnerabilidade crítica
 - [ ] Performance: <200ms para 95% das requisições
-- [ ] Dados sensíveis (prontuários) criptografados
-- [ ] Conformidade com regulamentações de dados de saúde
+- [ ] Dados sensíveis (prontuários) com controle de acesso granular
+- [ ] Auditoria de ações críticas sobre prontuários e prescrições
+- [ ] Conformidade com regulamentações de dados de saúde (LGPD/CFMV)
+- [ ] Máquina de estados de agendamento respeitada nas APIs
+- [ ] Permissões por perfil validadas em todos os endpoints
+- [ ] Upload de arquivos com validação de tipo e tamanho
+- [ ] Catálogos de medicamentos e vacinas funcionais
+- [ ] BillingRecord gerado automaticamente ao finalizar atendimento
 
 ---
 
-**Versão**: 1.0 | **Última atualização**: 2026-04-28 | **Status**: Em Desenvolvimento
+**Versão**: 1.1 | **Última atualização**: 2026-04-28 | **Status**: Em Desenvolvimento
