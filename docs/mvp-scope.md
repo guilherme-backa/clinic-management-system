@@ -1,7 +1,7 @@
 # Escopo do MVP
 
-**Versão**: 1.0  
-**Data**: 2026-04-28  
+**Versão**: 1.1
+**Data**: 2026-04-28
 **Status**: Draft
 
 ---
@@ -54,7 +54,7 @@ O MVP deve permitir que uma clínica ou grupo de clínicas comece a operar o sis
 ### 4. Base Técnica
 - banco PostgreSQL;
 - backend NestJS/Node.js;
-- frontend Next.js;
+- frontend web Next.js;
 - autenticação JWT;
 - documentação inicial;
 - logs básicos;
@@ -65,8 +65,8 @@ O MVP deve permitir que uma clínica ou grupo de clínicas comece a operar o sis
 ## O que não entra no MVP
 
 ### Funcionalidades adiadas
+- app mobile Flutter (previsto para Fase 2);
 - portal do cliente/tutor;
-- app mobile nativo;
 - telemedicina;
 - integração com CRMV;
 - pagamento online;
@@ -83,6 +83,17 @@ O MVP deve permitir que uma clínica ou grupo de clínicas comece a operar o sis
 - autenticação por hardware key;
 - política avançada por IP;
 - gestão avançada de dispositivos.
+
+---
+
+## Decisões técnicas já tomadas para pós-MVP
+
+- **Mobile**: Flutter 3.19+ com Dart 3.3+ (Android e iOS, codebase único);
+- arquitetura Clean Architecture com BLoC para gerenciamento de estado;
+- GoRouter para navegação;
+- Dio com interceptor JWT para comunicação com a API.
+
+Essas decisões estão documentadas em `tech-stack.md` e devem ser consideradas durante o desenvolvimento do MVP para que a API REST já seja desenhada de forma compatível com o consumo mobile.
 
 ---
 
@@ -143,5 +154,5 @@ A recomendação é iniciar com um monólito modular bem estruturado.
 
 ---
 
-**Versão**: 1.0  
+**Versão**: 1.1
 **Última atualização**: 2026-04-28
