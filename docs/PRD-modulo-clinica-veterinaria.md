@@ -32,14 +32,13 @@ Owner {
   first_name: String
   last_name: String
   email: String
-  cpf: String (único)
+  document_type: CPF | PASSPORT | CNH (obrigatório)
+  document_number: String (único, obrigatório)
   phone: String (obrigatório)
   phone_secondary: String
   address: Address
   birthdate: Date
   gender: MALE | FEMALE | OTHER
-  document_type: CPF | CNPJ | PASSPORT
-  document_number: String
   marital_status: SINGLE | MARRIED | DIVORCED | WIDOWED
   profession: String
   preferred_contact: EMAIL | PHONE | SMS | WHATSAPP
@@ -676,7 +675,7 @@ WAITING ──► SCHEDULED (quando agendamento é criado a partir da fila)
 - O tutor tem o direito de solicitar **exportação** do histórico clínico do animal (suportado em Fase 3).
 - Prontuários não podem ser excluídos permanentemente; o prazo mínimo de retenção seguirá regulamentação aplicável (referência: CFMV).
 - Todas as alterações em prontuários devem gerar entrada em `AuditLog` com `changes_before` e `changes_after`.
-- Dados de identificação do tutor (CPF, email, telefone) devem ser acessíveis apenas por usuários com permissão explícita.
+- Dados de identificação do responsável (documento, email, telefone) devem ser acessíveis apenas por usuários com permissão explícita.
 
 ---
 
@@ -685,8 +684,8 @@ WAITING ──► SCHEDULED (quando agendamento é criado a partir da fila)
 ### Fluxo 1: Registrar Novo Responsável/Tutor
 ```
 1. Recepcionista clica "Novo Responsável"
-2. Preenche dados: Nome, email, CPF, telefone, endereço
-3. Sistema valida CPF (formato e unicidade)
+2. Preenche dados: Nome, email, tipo de documento (CPF, Passaporte ou CNH), número do documento, telefone, endereço
+3. Sistema valida documento (formato conforme tipo e unicidade no sistema)
 4. Sistema valida email (unicidade no establishment)
 5. Sistema pergunta se deseja vincular a usuário existente
 6. Cria registro do responsável
@@ -695,7 +694,8 @@ WAITING ──► SCHEDULED (quando agendamento é criado a partir da fila)
 ```
 
 **Validações**:
-- CPF válido e único
+- Tipo de documento selecionado (CPF, Passaporte ou CNH)
+- Número do documento válido conforme tipo e único no sistema
 - Email único no estabelecimento
 - Telefone válido
 - Endereço válido

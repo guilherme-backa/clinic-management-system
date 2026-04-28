@@ -349,8 +349,9 @@ describe('Auth Endpoints', () => {
 - **UI Components**: shadcn/ui + Radix UI
 
 ### Mobile
-- **Framework**: React Native ou Flutter
-- **Package Manager**: npm/yarn
+- **Framework**: React Native ⭐ (Recomendado) ou Flutter
+- **Plataformas**: **Android** (10+) e **iOS** (15+)
+- **Package Manager**: npm/yarn (React Native) ou pub (Flutter)
 - **State Management**: Redux Toolkit ou Zustand
 
 ### Dependências Principais (Web)
@@ -598,4 +599,4 @@ SwaggerModule.setup('api/docs', app, document);
 
 ---
 
-**Versão**: 1.0 | **Última atualização**: 2026-04-28
+**Versão**: 1.1 | **Última atualização**: 2026-04-28

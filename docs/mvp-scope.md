@@ -54,7 +54,7 @@ O MVP deve permitir que uma clínica ou grupo de clínicas comece a operar o sis
 ### 4. Base Técnica
 - banco PostgreSQL;
 - backend NestJS/Node.js;
-- frontend Next.js;
+- frontend Next.js **responsivo** (compatível com navegadores mobile — Android e iOS);
 - autenticação JWT;
 - documentação inicial;
 - logs básicos;
@@ -66,9 +66,9 @@ O MVP deve permitir que uma clínica ou grupo de clínicas comece a operar o sis
 
 ### Funcionalidades adiadas
 - portal do cliente/tutor;
-- app mobile nativo;
+- app mobile nativo (Android/iOS) — a aplicação web será responsiva e acessível via navegador mobile no MVP;
 - telemedicina;
-- integração com CRMV;
+- integração automática com CRMV;
 - pagamento online;
 - chat em tempo real;
 - BI avançado;

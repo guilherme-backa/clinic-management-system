@@ -1,6 +1,6 @@
 # Arquitetura de Banco de Dados
 
-**Versão**: 1.0 | **Data**: 2026-04-28 | **Database**: PostgreSQL 14+
+**Versão**: 1.1 | **Data**: 2026-04-28 | **Database**: PostgreSQL 14+
 
 ---
 
@@ -40,8 +40,10 @@
 │              │              │                             │
 │              │ - id (PK)    │                             │
 │              │ - email      │                             │
-│              │ - cpf        │                             │
+│              │ - doc_type   │                             │
+│              │ - doc_number │                             │
 │              │ - password   │                             │
+│              │ - crmv_number│                             │
 │              │ - 2fa_*      │                             │
 │              └──────────────┘                             │
 │                                                            │
@@ -78,12 +80,12 @@
 │  │ - id (PK)    │      │ - id (PK)    │                    │
 │  │ - est_id(FK) │      │ - est_id(FK) │                    │
 │  │ - first_name │      │ - owner_id   │                    │
-│  │ - cpf        │      │ - name       │                    │
-│  │ - phone      │      │ - species    │                    │
-│  │ - email      │      │ - breed      │                    │
-│  │ - address    │      │ - birthdate  │                    │
-│  └──────────────┘      │ - weight_kg  │                    │
-│         ▲              │ - status     │                    │
+│  │ - doc_type   │      │ - name       │                    │
+│  │ - doc_number │      │ - species    │                    │
+│  │ - phone      │      │ - breed      │                    │
+│  │ - email      │      │ - birthdate  │                    │
+│  │ - address    │      │ - weight_kg  │                    │
+│  └──────────────┘      │ - status     │                    │
 │         │              └──────────────┘                    │
 │         │                     ▲                            │
 │         │                     │                            │
@@ -204,9 +206,9 @@ CREATE TABLE establishments (
   phone VARCHAR(20) NOT NULL,
   email VARCHAR(255) NOT NULL,
   website VARCHAR(255),
-  cnpj VARCHAR(18) UNIQUE,
+  cnpj VARCHAR(18) NOT NULL UNIQUE,
   inscricao_estadual VARCHAR(20),
-  razao_social VARCHAR(255),
+  razao_social VARCHAR(255) NOT NULL,
   status VARCHAR(50) NOT NULL DEFAULT 'ACTIVE',
   opening_date DATE,
   closing_date DATE,
@@ -217,13 +219,13 @@ CREATE TABLE establishments (
   number_of_staff INTEGER,
   logo_url VARCHAR(500),
   photo_url VARCHAR(500),
-  address_street VARCHAR(255),
-  address_number VARCHAR(20),
+  address_street VARCHAR(255) NOT NULL,
+  address_number VARCHAR(20) NOT NULL,
   address_complement VARCHAR(255),
-  address_neighborhood VARCHAR(100),
-  address_city VARCHAR(100),
-  address_state VARCHAR(2),
-  address_postal_code VARCHAR(10),
+  address_neighborhood VARCHAR(100) NOT NULL,
+  address_city VARCHAR(100) NOT NULL,
+  address_state VARCHAR(2) NOT NULL,
+  address_postal_code VARCHAR(10) NOT NULL,
   address_country VARCHAR(100) DEFAULT 'Brasil',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -245,7 +247,8 @@ CREATE TABLE users (
   email_verified_at TIMESTAMP NULL,
   first_name VARCHAR(100) NOT NULL,
   last_name VARCHAR(100) NOT NULL,
-  cpf VARCHAR(11) UNIQUE NOT NULL,
+  document_type VARCHAR(10) NOT NULL CHECK (document_type IN ('CPF', 'PASSPORT', 'CNH')),
+  document_number VARCHAR(50) NOT NULL UNIQUE,
   phone VARCHAR(20),
   birthdate DATE,
   gender VARCHAR(50),
@@ -258,7 +261,7 @@ CREATE TABLE users (
   status VARCHAR(50) NOT NULL DEFAULT 'ACTIVE',
   last_login_at TIMESTAMP NULL,
   last_login_ip VARCHAR(45),
-  professional_license_number VARCHAR(50),
+  crmv_number VARCHAR(50),
   license_expiration_date DATE,
   specialties TEXT[],
   notification_email BOOLEAN DEFAULT true,
@@ -273,7 +276,7 @@ CREATE TABLE users (
 );
 
 CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_cpf ON users(cpf);
+CREATE INDEX idx_users_document_number ON users(document_number);
 CREATE INDEX idx_users_status ON users(status);
 ```
 
@@ -435,13 +438,12 @@ CREATE TABLE owners (
   first_name VARCHAR(100) NOT NULL,
   last_name VARCHAR(100) NOT NULL,
   email VARCHAR(255),
-  cpf VARCHAR(11) UNIQUE NOT NULL,
+  document_type VARCHAR(10) NOT NULL CHECK (document_type IN ('CPF', 'PASSPORT', 'CNH')),
+  document_number VARCHAR(50) NOT NULL UNIQUE,
   phone VARCHAR(20) NOT NULL,
   phone_secondary VARCHAR(20),
   birthdate DATE,
   gender VARCHAR(50),
-  document_type VARCHAR(50) DEFAULT 'CPF',
-  document_number VARCHAR(50),
   marital_status VARCHAR(50),
   profession VARCHAR(100),
   preferred_contact VARCHAR(50) DEFAULT 'PHONE',
@@ -462,7 +464,7 @@ CREATE TABLE owners (
 );
 
 CREATE INDEX idx_owners_establishment_id ON owners(establishment_id);
-CREATE INDEX idx_owners_cpf ON owners(cpf);
+CREATE INDEX idx_owners_document_number ON owners(document_number);
 CREATE INDEX idx_owners_email ON owners(email);
 ```
 

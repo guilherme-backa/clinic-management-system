@@ -1,6 +1,6 @@
 # PRD - Módulo de Configuração e Gestão do Sistema e Usuários
 
-**Versão**: 1.0  
+**Versão**: 1.1  
 **Data**: 2026-04-28  
 **Status**: Em Desenvolvimento
 
@@ -118,18 +118,18 @@ Workspace {
 Establishment {
   id: UUID
   workspace_id: UUID
-  name: string
+  name: string (obrigatório)
   slug: string
-  phone: string
-  email: string
+  phone: string (obrigatório)
+  email: string (obrigatório)
   website: string
-  cnpj: string
-  razao_social: string
+  cnpj: string (obrigatório, único)
+  razao_social: string (obrigatório)
   status: ACTIVE | INACTIVE | CLOSED
   opening_date: date
-  operating_hours: json
+  operating_hours: json (obrigatório)
   settings: json
-  address: json
+  address: json (obrigatório — rua, número, bairro, cidade, estado, CEP)
   created_at: timestamp
   updated_at: timestamp
   deleted_at: timestamp | null
@@ -145,7 +145,8 @@ User {
   email_verified_at: timestamp | null
   first_name: string
   last_name: string
-  cpf: string
+  document_type: CPF | PASSPORT | CNH (obrigatório)
+  document_number: string (único, obrigatório)
   phone: string
   birthdate: date
   password_hash: string
@@ -155,7 +156,7 @@ User {
   status: ACTIVE | INACTIVE | SUSPENDED | DELETED
   last_login_at: timestamp | null
   last_login_ip: string | null
-  professional_license_number: string | null
+  crmv_number: string | null (obrigatório para perfil Veterinário)
   specialties: string[]
   settings: json
   avatar_url: string | null
@@ -292,8 +293,8 @@ AuditLog {
 
 ### Fluxo 2: Cadastro do Primeiro Estabelecimento
 1. Após criar o workspace, o usuário é direcionado para cadastrar a primeira clínica.
-2. Informa nome, CNPJ, telefone, email, endereço e horários.
-3. O sistema valida os campos obrigatórios.
+2. Informa nome, CNPJ, razão social, telefone, email, endereço completo (rua, número, bairro, cidade, estado, CEP) e horários de funcionamento.
+3. O sistema valida os campos obrigatórios, incluindo CNPJ (formato e unicidade) e endereço completo.
 4. O estabelecimento é criado e vinculado ao workspace.
 5. O sistema marca o workspace como apto para operação.
 
@@ -389,6 +390,9 @@ AuditLog {
 6. O Super Admin não pertence operacionalmente ao workspace, mas pode administrá-lo.
 7. Um usuário pode atuar em múltiplos estabelecimentos, respeitando permissões.
 8. Papéis do sistema podem ser imutáveis ou parcialmente editáveis conforme regra.
+9. Todo usuário do sistema deve informar obrigatoriamente um dos seguintes documentos: **CPF**, **Passaporte** ou **CNH**. O documento deve ser único no sistema.
+10. Usuários com perfil **Veterinário** devem informar obrigatoriamente o número do **CRM-V** (Registro no Conselho Regional de Medicina Veterinária). O campo `crmv_number` deve ser validado e não pode ficar em branco para este perfil.
+11. O cadastro de um estabelecimento exige obrigatoriamente **CNPJ**, **razão social**, **telefone**, **email** e **endereço completo** (rua, número, bairro, cidade, estado e CEP). Campos faltantes devem bloquear o cadastro.
 
 ---
 
@@ -492,6 +496,10 @@ AuditLog {
 - [ ] Login com sessão e 2FA funciona corretamente.
 - [ ] Logs de auditoria são registrados para ações críticas.
 - [ ] Isolamento de dados por workspace está garantido.
+- [ ] Todo usuário deve informar CPF, Passaporte ou CNH ao se cadastrar; documentos duplicados são rejeitados.
+- [ ] O cadastro de Veterinário é rejeitado se o campo CRM-V não for informado ou for inválido.
+- [ ] O cadastro de clínica é rejeitado se CNPJ, razão social ou endereço completo não forem informados.
+- [ ] O sistema funciona em navegadores modernos e em dispositivos Android e iOS.
 
 ---
 
@@ -525,6 +533,6 @@ Também é recomendável adicionar, em seguida:
 
 ---
 
-**Versão**: 1.0  
+**Versão**: 1.1  
 **Última atualização**: 2026-04-28  
 **Status**: Em Desenvolvimento

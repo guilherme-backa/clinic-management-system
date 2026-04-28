@@ -1,6 +1,6 @@
 # Requisitos Não Funcionais
 
-**Versão**: 1.0  
+**Versão**: 1.1  
 **Data**: 2026-04-28  
 **Status**: Draft
 
@@ -146,10 +146,16 @@ A navegação deve respeitar contexto de workspace e clínica.
 ## 9. Compatibilidade
 
 ### RNF-COMP-001
-A aplicação web deve funcionar nos principais navegadores modernos.
+A aplicação web deve funcionar nos principais navegadores modernos (Chrome, Firefox, Safari, Edge).
 
 ### RNF-COMP-002
-A aplicação deve ser responsiva para uso em diferentes resoluções, mesmo que o foco inicial seja desktop.
+A aplicação deve ser responsiva e funcionar adequadamente em dispositivos móveis (smartphones e tablets) com sistemas operacionais **Android** e **iOS**, além de navegadores desktop.
+
+### RNF-COMP-003
+O sistema deve disponibilizar um aplicativo móvel nativo ou híbrido (React Native ou Flutter) compatível com **Android** (versão 10+) e **iOS** (versão 15+), com paridade funcional de pelo menos 80% em relação à versão web para as operações do dia a dia da clínica.
+
+### RNF-COMP-004
+Todas as APIs do backend devem ser projetadas para consumo tanto pela aplicação web quanto pelo aplicativo móvel, sem necessidade de endpoints exclusivos por plataforma.
 
 ---
 
@@ -230,5 +236,5 @@ A documentação deve explicar setup mínimo do sistema.
 
 ---
 
-**Versão**: 1.0  
+**Versão**: 1.1  
 **Última atualização**: 2026-04-28
