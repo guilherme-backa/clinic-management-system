@@ -1,0 +1,16 @@
+services:
+  backend:
+    image: ${DOCKER_REGISTRY:-localhost:8082}/clinic/backend:${BACKEND_VERSION:-latest}
+    container_name: clinic_backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    env_file:
+      - ../../.env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - clinic_net

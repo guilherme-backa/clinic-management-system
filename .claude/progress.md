@@ -7,63 +7,81 @@ Em caso de travamento, leia este arquivo para retomar de onde parou.
 
 ## Última sessão
 
-**Data:** 2026-04-28
+**Data:** 2026-04-29
 
 ### Estado atual do projeto
 
-**Branch:** main (up to date com origin/main)
+**Branch:** main
 
-**Último commit:** `9237a3c chore: montar estrutura completa do projeto`
-
-**Estrutura criada:**
-- `backend/src/modules/` → animals, appointments, auth, establishments, medical-records, users, workspaces
-- `backend/src/database/` → migrations, seeds
-- `docker-compose.yml` configurado
-- `.env.example` atualizado
-
-**Modificações não commitadas (git diff):**
-- `.env.example`
-- `backend/package.json` + `package-lock.json`
-- `backend/src/app.module.ts`
-- `docker-compose.yml`
+**Estrutura:**
+- `backend/src/common/` → base entity, enums, decorators, guards
+- `backend/src/modules/auth/` → AuthModule (login, refresh, logout, JWT strategies)
+- `backend/src/modules/users/` → UsersModule (CRUD)
+- `backend/src/modules/workspaces/` → WorkspacesModule (CRUD + members)
+- `backend/src/modules/establishments/` → EstablishmentsModule (CRUD + members + invitations entity)
+- `backend/src/database/seeds/seed.ts` → Seed inicial (admin@clinic.com / Admin@123)
 
 ### Decisões técnicas confirmadas
 
-- Docker Compose para orquestrar todos os serviços
-- Nexus OSS em container (porta 8081 UI, 8082 Docker registry)
-- MySQL no HOST (fora do Docker), acessado via `host.docker.internal:3306`
-- Redis em container
+- MySQL no HOST (localhost:3306 fora do Docker, host.docker.internal dentro)
+- Redis em container (porta 6379)
 - Backend e Frontend como imagens versionadas no Nexus local
+- `synchronize: true` em desenvolvimento (TypeORM cria tabelas automaticamente)
+- Polyfill de `globalThis.crypto` no `main.ts` para compatibilidade Node 18
 
-### O que estava sendo feito
+### Concluído em 2026-04-29 (sessão atual)
 
-> ✅ Stack completa rodando. Build e push concluídos.
+- Implementados módulos: Auth, Users, Workspaces, Establishments
+- Entidades criadas: User, Role, Session, Workspace, WorkspaceUser, Establishment, EstablishmentUser, Invitation
+- Guards globais: JwtAuthGuard (global via APP_GUARD), RolesGuard
+- Decorators: @CurrentUser(), @Roles(), @Public()
+- Seed script: `DB_HOST=localhost npx ts-node -r tsconfig-paths/register src/database/seeds/seed.ts`
+- Testado: login retorna accessToken + refreshToken, /users e /workspaces funcionando
+- Backend compilado e rodando na porta 3002 (dev local) e 3000 (Docker)
 
-### Concluído em 2026-04-28
+### Como rodar localmente (dev)
 
-- `backend/Dockerfile` — multi-stage build NestJS (corrigido `--omit=dev`, `dist/main`)
-- `frontend-web/Dockerfile` — multi-stage build Next.js standalone
-- `frontend-web/next.config.ts` — adicionado `output: 'standalone'`
-- `scripts/build-push.sh` — build + push para Nexus com login automático
+```bash
+cd /opt/clinic-management-system/backend
+DB_HOST=localhost REDIS_HOST=localhost PORT=3002 \
+  set -a && source /opt/clinic-management-system/.env && set +a && \
+  DB_HOST=localhost REDIS_HOST=localhost PORT=3002 NODE_ENV=development \
+  node dist/main.js
+```
 
-### Concluído em 2026-04-29
+Ou com watch:
+```bash
+set -a && source /opt/clinic-management-system/.env && set +a
+DB_HOST=localhost REDIS_HOST=localhost PORT=3002 NODE_ENV=development npm run start:dev
+```
 
-- MySQL no host: banco `clinic_db` + usuário `clinic` criados
-- Nexus: EULA aceito, DockerToken realm ativo, repositório `clinic-docker` (porta 8082)
-- Docker daemon: `insecure-registries: localhost:8082`
-- Imagens buildadas (Node 20, `--maxsockets 2`, `nice -n 19`) e publicadas no Nexus
-- Stack completa rodando: backend :3000, frontend :3001, redis :6379, nexus :8081/:8082
+### Tabelas criadas no MySQL (via synchronize)
 
-### Concluído em 2026-04-29 (continuação)
-
-- Projeto movido de `/home/backa/clinic-management-system` para `/opt/clinic-management-system`
-- Stack reiniciada e funcionando normalmente no novo caminho
+- users
+- roles
+- sessions
+- workspaces
+- workspace_users
+- establishments
+- establishment_users
+- invitations
 
 ### Próximos passos
 
-- Implementar os módulos do backend (entities, controllers, services)
-- Configurar migrations do TypeORM
-- Desenvolver frontend (autenticação, dashboards)
+1. **Módulos clínicos do backend:**
+   - `animals` module (Owner + Animal entities + CRUD)
+   - `appointments` module (Appointment + AppointmentService + Service entities + CRUD)
+   - `medical-records` module (MedicalRecord + Prescription + Vaccination entities + CRUD)
+
+2. **Build e deploy no Nexus:**
+   - Rebuild imagem do backend após módulos clínicos
+   - `cd /opt/clinic-management-system && bash scripts/build-push.sh`
+
+3. **Frontend Web (Next.js):**
+   - Páginas de autenticação (login)
+   - Dashboard
+   - CRUD de workspaces, establishments, users
+   - Módulo clínico (owners, animals, appointments)
 
 ---
 

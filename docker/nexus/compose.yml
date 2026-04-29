@@ -1,0 +1,20 @@
+services:
+  nexus:
+    image: sonatype/nexus3:latest
+    container_name: clinic_nexus
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+      - "8082:8082"
+    volumes:
+      - /opt/nexus-data:/nexus-data
+    environment:
+      INSTALL4J_ADD_VM_PARAMS: "-Xms1g -Xmx2g -XX:MaxDirectMemorySize=2g"
+    networks:
+      - clinic_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/service/rest/v1/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
