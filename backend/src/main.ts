@@ -1,3 +1,9 @@
+// Polyfill globalThis.crypto for Node 18 (required by @nestjs/typeorm)
+import { webcrypto } from 'node:crypto';
+if (!globalThis.crypto) {
+  Object.defineProperty(globalThis, 'crypto', { value: webcrypto });
+}
+
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
