@@ -66,6 +66,22 @@ DB_HOST=localhost REDIS_HOST=localhost PORT=3002 NODE_ENV=development npm run st
 - establishment_users
 - invitations
 
+### Estrutura Docker (reorganizada em 2026-04-29)
+
+```
+docker-compose.yml          ← raiz, usa `include` para cada serviço
+docker/
+├── nexus/compose.yml
+├── redis/compose.yml
+├── backend/compose.yml
+└── frontend-web/compose.yml
+.env                        ← único .env unificado na raiz
+```
+
+- Portas configuráveis via .env: BACKEND_PORT, FRONTEND_PORT, REDIS_PORT
+- Todos os serviços na rede `clinic_net` (bridge)
+- Volume `redis_data` definido no compose.yml do redis e mergeado pelo root
+
 ### Próximos passos
 
 1. **Módulos clínicos do backend:**
